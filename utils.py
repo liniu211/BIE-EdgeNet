@@ -5,6 +5,7 @@ from torchvision import utils
 
 import data_config
 from datasets.CD_dataset import CDDataset
+from datasets.CD_dataset_abs import CDDatasetAbs
 
 
 def get_loader(data_name, img_size=256, batch_size=8, split='test',
@@ -17,9 +18,13 @@ def get_loader(data_name, img_size=256, batch_size=8, split='test',
         data_set = CDDataset(root_dir=root_dir, split=split,
                                  img_size=img_size, is_train=is_train,
                                  label_transform=label_transform)
+    elif dataset == 'CDDatasetAbs':
+        data_set = CDDatasetAbs(root_dir=root_dir, split=split,
+                                img_size=img_size, is_train=is_train,
+                                label_transform=label_transform)
     else:
         raise NotImplementedError(
-            'Wrong dataset name %s (choose one from [CDDataset])'
+            'Wrong dataset name %s (choose one from [CDDataset, CDDatasetAbs])'
             % dataset)
 
     shuffle = is_train
@@ -46,9 +51,16 @@ def get_loaders(args):
         val_set = CDDataset(root_dir=root_dir, split=split_val,
                                  img_size=args.img_size,is_train=False,
                                  label_transform=label_transform)
+    elif args.dataset == 'CDDatasetAbs':
+        training_set = CDDatasetAbs(root_dir=root_dir, split=split,
+                                    img_size=args.img_size, is_train=True,
+                                    label_transform=label_transform)
+        val_set = CDDatasetAbs(root_dir=root_dir, split=split_val,
+                                    img_size=args.img_size, is_train=False,
+                                    label_transform=label_transform)
     else:
         raise NotImplementedError(
-            'Wrong dataset name %s (choose one from [CDDataset,])'
+            'Wrong dataset name %s (choose one from [CDDataset, CDDatasetAbs])'
             % args.dataset)
 
     datasets = {'train': training_set, 'val': val_set}

@@ -121,8 +121,8 @@ if __name__ == '__main__':
     args3.vis_dir = os.path.join(args3.vis_root, args3.project_name)
     os.makedirs(args3.vis_dir, exist_ok=True)
     
-    train(args3, mode='ALL')
-    test(args3, mode='ALL')
+    # train(args3, mode='ALL')
+    # test(args3, mode='ALL')
 
 
     parser = ArgumentParser()
@@ -182,7 +182,65 @@ if __name__ == '__main__':
     os.makedirs(args.vis_dir, exist_ok=True)
 
     # train(args, mode='CNN_Tr_BIE')
-    test(args, mode='Edge')
+    # test(args, mode='Edge')
+
+    # ----------------------------------------------------------
+    # ChangeMamba 实验（rqx 数据集：WHU-CD / GVLM-CD / LBFD-CD）
+    # 切数据集改 --data_name 与 --project_name：
+    #   rqx-WHU-CD  / rqx-GVLM-CD / rqx-LBFD-CD
+    # ----------------------------------------------------------
+    parser_mamba = ArgumentParser()
+    parser_mamba.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
+    parser_mamba.add_argument('--project_name', default='ChangeMamba-rqx-WHU-CD', type=str)
+    parser_mamba.add_argument('--checkpoint_root', default='checkpoints', type=str)
+    parser_mamba.add_argument('--vis_root', default='vis', type=str)
+
+    # data
+    parser_mamba.add_argument('--num_workers', default=0, type=int)
+    parser_mamba.add_argument('--dataset', default='CDDatasetAbs', type=str)
+    parser_mamba.add_argument('--data_name', default='rqx-WHU-CD', type=str)
+
+    parser_mamba.add_argument('--batch_size', default=16, type=int)
+    parser_mamba.add_argument('--split', default="train", type=str)
+    parser_mamba.add_argument('--split_val', default="val", type=str)
+
+    parser_mamba.add_argument('--img_size', default=256, type=int)
+    parser_mamba.add_argument('--shuffle_AB', default=False, type=str)
+
+    # model4
+    parser_mamba.add_argument('--n_class', default=2, type=int)
+    parser_mamba.add_argument('--embed_dim', default=32, type=int)
+    parser_mamba.add_argument('--pretrain', default=None, type=str)
+    parser_mamba.add_argument('--multi_scale_train', default=False, type=str)
+    parser_mamba.add_argument('--multi_scale_infer', default=False, type=str)
+    parser_mamba.add_argument('--multi_pred_weights', nargs='+', type=float, default=[0.5, 0.5, 0.5, 0.8, 1.0])
+
+    parser_mamba.add_argument('--net_G', default='ChangeMamba', type=str,
+                         help='base_resnet18 | base_transformer_pos_s4 | '
+                              'base_transformer_pos_s4_dd8 | '
+                              'base_transformer_pos_s4_dd8_dedim8|ChangeFormerV5|SiamUnet_diff')
+    parser_mamba.add_argument('--loss', default='MambaBCDLoss', type=str)
+
+    # optimizer
+    parser_mamba.add_argument('--optimizer', default='adamw', type=str)
+    parser_mamba.add_argument('--lr', default=0.0001, type=float)
+    parser_mamba.add_argument('--max_epochs', default=200, type=int)
+    parser_mamba.add_argument('--lr_policy', default='linear', type=str,
+                         help='linear | step')
+    parser_mamba.add_argument('--lr_decay_iters', default=100, type=int)
+
+    args_mamba = parser_mamba.parse_args()
+    utils.get_device(args_mamba)
+
+    #  checkpoints dir
+    args_mamba.checkpoint_dir = os.path.join(args_mamba.checkpoint_root, args_mamba.project_name)
+    os.makedirs(args_mamba.checkpoint_dir, exist_ok=True)
+    #  visualize dir
+    args_mamba.vis_dir = os.path.join(args_mamba.vis_root, args_mamba.project_name)
+    os.makedirs(args_mamba.vis_dir, exist_ok=True)
+
+    train(args_mamba, mode='ALL')
+    test(args_mamba, mode='ALL')
     #
     # parser2 = ArgumentParser()
     # parser2.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')

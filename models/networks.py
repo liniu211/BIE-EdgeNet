@@ -13,7 +13,6 @@ from models.ChangeDINO.BIE_ChangeDINO import BIE_ChangeDINO, Pre_Post_TemporalBI
 from models.EATDernet import EATDer
 from models.help_funcs import Transformer, TransformerDecoder, TwoLayerConv2d
 from models.EGCTNet import EGCTNet
-from models.ICIFNet import ICIFNet
 from models.DMINet import DMINet, CrossAtt, BasicConv2d, decode
 from models.ChangeViT import ChangeViT
 from models.VcT import Reliable_Transformer
@@ -269,6 +268,7 @@ def define_G(args, init_type='normal', init_gain=0.02, gpu_ids=[]):
         net = AERNet(pretrained=True)
     # Feature Interaction
     elif args.net_G == 'ICIFNet':
+        from models.ICIFNet import ICIFNet
         net = ICIFNet(pretrained=True)
 
     elif args.net_G == 'DMINet':

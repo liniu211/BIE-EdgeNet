@@ -86,6 +86,18 @@ class DataConfig:
         elif data_name == 'CDCD-9-1-10':
             self.label_transform = "norm"
             self.root_dir = r'E:\zyh\Data\CDCD\CDCD_test'
+        # ===========================================================
+        # rqx 本地数据集（E:\rqx\dataes），t1/t2/label 协议
+        # ===========================================================
+        elif data_name == 'rqx-WHU-CD':
+            self.label_transform = "norm"
+            self.root_dir = r'E:\rqx\dataes\WHU-CD'
+        elif data_name == 'rqx-GVLM-CD':
+            self.label_transform = "norm"
+            self.root_dir = r'E:\rqx\dataes\GVLM-CD'
+        elif data_name == 'rqx-LBFD-CD':
+            self.label_transform = "norm"
+            self.root_dir = r'E:\rqx\dataes\LBFD-CD'
         else:
             raise TypeError('%s has not defined' % data_name)
         return self
