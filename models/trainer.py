@@ -496,10 +496,6 @@ class CDTrainer():
 
     def _update_checkpoints(self):
 
-        epoch_name = 'last_ckpt_{}.pt'.format(self.epoch_id + 1)
-        self._save_checkpoint(ckpt_name=epoch_name)
-        self.logger.write('The .pt for the epoch %d has been synchronized.\n' % (self.epoch_id + 1))
-
         # update the best model (based on eval acc)
         if self.epoch_f1 > self.best_val_f1:
             self.best_val_f1 = self.epoch_f1
