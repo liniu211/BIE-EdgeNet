@@ -13,13 +13,13 @@ def save_tp_fp_tn_fn_vis(pred_tensor, gt_tensor, img_name, save_root, color_map=
         img_name: 图像名称
         save_root: 保存根目录
     """
-    # 1. 颜色映射（按你的要求：TP白、FP绿、TN黑、FN红）
+    # 1. 颜色映射（rscd 标准：TP白、TN黑、FP红、FN绿）
     if color_map is None:
         color_map = {
-            'TP': (255, 255, 255),  # 真阳性（预测对的变化）
-            'FP': (253, 251, 115),   # 假阳性（预测错的变化）
-            'TN': (0, 0, 0),         # 真阴性（预测对的不变）
-            'FN': (0, 0, 255)        # 假阴性（预测错的不变）
+            'TP': (255, 255, 255),  # 真阳性（GT=变化, Pred=变化）命中的变化
+            'TN': (0, 0, 0),         # 真阴性（GT=背景, Pred=背景）正确背景
+            'FP': (255, 0, 0),       # 假阳性（GT=背景, Pred=变化）误报：无中生有
+            'FN': (0, 255, 0)        # 假阴性（GT=变化, Pred=背景）漏报：漏掉的变化
         }
 
     # 2. 处理预测Tensor：转numpy + 二值化（0/255）
@@ -56,15 +56,15 @@ def save_tp_fp_tn_fn_vis(pred_tensor, gt_tensor, img_name, save_root, color_map=
     vis_img = np.zeros((h, w, 3), dtype=np.uint8)
     vis_img[:, :, :] = color_map['TN']  # 默认TN（黑色）
 
-    # TP：预测=255 且 GT=255 → 白色
+    # TP：GT=255, Pred=255 → 白色（命中变化）
     tp_mask = (pred_binary == 255) & (gt_binary == 255)
     vis_img[tp_mask] = color_map['TP']
 
-    # FP：预测=255 且 GT=0 → 绿色
+    # FP：GT=0, Pred=255 → 红色（误报：无中生有）
     fp_mask = (pred_binary == 255) & (gt_binary == 0)
     vis_img[fp_mask] = color_map['FP']
 
-    # FN：预测=0 且 GT=255 → 红色
+    # FN：GT=255, Pred=0 → 绿色（漏报：漏掉的变化）
     fn_mask = (pred_binary == 0) & (gt_binary == 255)
     vis_img[fn_mask] = color_map['FN']
 

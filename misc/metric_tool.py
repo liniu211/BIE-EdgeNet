@@ -94,6 +94,22 @@ def cm2F1(confusion_matrix):
 
 
 def cm2score(confusion_matrix):
+    """
+    入参:
+        confusion_matrix: np.ndarray, 形状 [n_class, n_class]，二分类下
+            hist[i, j] = GT=i, Pred=j 的像素数
+            hist[0,0]=TN  hist[0,1]=FP
+            hist[1,0]=FN  hist[1,1]=TP
+    方法:
+        逐类计算 precision/recall/F1/IoU；
+        二分类（n_class==2）下补齐 rscd 标准 7 项总体指标：
+        OA、Precision、Recall、F1、IoU（均为变化类）、Kappa、Pre。
+        Kappa=(OA-Pre)/(1-Pre)，Pre 为随机一致性期望；
+        所有分母加 eps 防除零。
+    出参:
+        dict: 兼容旧字段（acc/miou/mf1 + 各类分项），
+        二分类时额外注入 rscd 七项（OA/F1/IoU/Kappa/recall/precision/Pre）。
+    """
     hist = confusion_matrix
     n_class = hist.shape[0]
     tp = np.diag(hist)
@@ -135,6 +151,31 @@ def cm2score(confusion_matrix):
     score_dict.update(cls_F1)
     score_dict.update(cls_precision)
     score_dict.update(cls_recall)
+
+    # ---------------------------------------------------------------------- #
+    # 3. rscd 标准七项总体指标（仅二分类变化检测）
+    # ---------------------------------------------------------------------- #
+    if n_class == 2:
+        tn, fp, fn, tp_2 = hist[0, 0], hist[0, 1], hist[1, 0], hist[1, 1]
+        total = tn + fp + fn + tp_2
+        eps = np.finfo(np.float32).eps
+        OA = (tp_2 + tn) / (total + eps)
+        Precision_2 = tp_2 / (tp_2 + fp + eps)
+        Recall_2 = tp_2 / (tp_2 + fn + eps)
+        F1_2 = 2 * Recall_2 * Precision_2 / (Recall_2 + Precision_2 + eps)
+        IoU_2 = tp_2 / (tp_2 + fp + fn + eps)
+        # Pre: 随机一致性期望 = (行边缘·列边缘之和) / total^2
+        Pre = ((tp_2 + fn) * (tp_2 + fp) + (tn + fp) * (tn + fn)) / (total * total + eps)
+        Kappa = (OA - Pre) / (1 - Pre + eps)
+        score_dict.update({
+            'OA': OA,
+            'F1': F1_2,
+            'IoU': IoU_2,
+            'Kappa': Kappa,
+            'recall': Recall_2,
+            'precision': Precision_2,
+            'Pre': Pre,
+        })
     return score_dict
 
 
