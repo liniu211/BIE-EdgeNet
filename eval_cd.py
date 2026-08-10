@@ -1,6 +1,9 @@
 from argparse import ArgumentParser
+import os
 import torch
 from models.evaluator import *
+import data_config
+import utils
 
 print(torch.cuda.is_available())
 
@@ -15,15 +18,15 @@ def main():
     # ------------
     parser = ArgumentParser()
     parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-    parser.add_argument('--project_name', default='LEVIR-256-edge', type=str)
+    parser.add_argument('--project_name', default='ChangeMamba-rqx-WHU-CD', type=str)
     parser.add_argument('--print_models', default=False, type=bool, help='print models')
     parser.add_argument('--checkpoints_root', default='checkpoints', type=str)
     parser.add_argument('--vis_root', default='vis', type=str)
 
     # data
     parser.add_argument('--num_workers', default=8, type=int)
-    parser.add_argument('--dataset', default='CDDataset', type=str)
-    parser.add_argument('--data_name', default='LEVIR-256-edge', type=str)
+    parser.add_argument('--dataset', default='CDDatasetAbs', type=str)
+    parser.add_argument('--data_name', default='rqx-WHU-CD', type=str)
 
     parser.add_argument('--batch_size', default=4, type=int)
     parser.add_argument('--split', default="test", type=str)
@@ -32,10 +35,11 @@ def main():
 
     # model
     parser.add_argument('--n_class', default=2, type=int)
-    parser.add_argument('--embed_dim', default=256, type=int)
-    parser.add_argument('--net_G', default='base_transformer_pos_s4_dd8_dedim8', type=str,
+    parser.add_argument('--embed_dim', default=32, type=int)
+    parser.add_argument('--net_G', default='ChangeMamba', type=str,
                         help='base_resnet18 | base_transformer_pos_s4_dd8 | base_transformer_pos_s4_dd8_dedim8|')
 
+    parser.add_argument('--loss', default='MambaBCDLoss', type=str)
     parser.add_argument('--checkpoint_name', default='best_ckpt.pt', type=str)
 
     args = parser.parse_args()
@@ -51,8 +55,11 @@ def main():
 
     dataloader = utils.get_loader(args.data_name, img_size=args.img_size,
                                   batch_size=args.batch_size, is_train=False,
-                                  split=args.split)
-    model = CDEvaluator(args=args, dataloader=dataloader)
+                                  split=args.split, dataset=args.dataset)
+    # 测试输出（pred/四色图）落盘根目录：数据集根/project_name
+    test_root = data_config.DataConfig().get_data_config(args.data_name).root_dir
+    test_name = os.path.join(test_root, args.project_name)
+    model = CDEvaluator(args=args, dataloader=dataloader, test_name=test_name)
 
     model.eval_models(checkpoint_name=args.checkpoint_name)
 

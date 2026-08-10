@@ -98,6 +98,12 @@ class DataConfig:
         elif data_name == 'rqx-LBFD-CD':
             self.label_transform = "norm"
             self.root_dir = r'E:\rqx\dataes\LBFD-CD'
+        elif data_name == 'rqx-CLCD-CD':
+            self.label_transform = "norm"
+            self.root_dir = r'E:\rqx\dataes\CLCD-CD'
+        elif data_name == 'rqx-LEVIR-CD':
+            self.label_transform = "norm"
+            self.root_dir = r'E:\rqx\dataes\LEVIR-CD'
         else:
             raise TypeError('%s has not defined' % data_name)
         return self
